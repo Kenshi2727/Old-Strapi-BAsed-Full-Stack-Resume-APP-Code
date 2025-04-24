@@ -1,0 +1,13 @@
+{
+    "version": 2,
+    "rewrites": [
+        {
+            "source": "/my-resume/:resumeId/view",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/:path*",
+            "destination": "/index.html"
+        }
+    ]
+}
