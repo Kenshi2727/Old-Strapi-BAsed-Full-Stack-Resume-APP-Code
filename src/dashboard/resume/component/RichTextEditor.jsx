@@ -74,10 +74,40 @@ function RichTextEditor({ onRichTextEditorChange, index, defaultValue }) {
         console.log(PROMPT);
         const result = await chatSession.sendMessage(prompt);
         console.log(result.response.text());
-        const res = result.response.text();
-        setvalue(res.replace('[', '').replace(']').replace('{', '').replace('}'));
+        // const res = result.response.text();
+        // setvalue(res.replace('[', '').replace(']').replace('{', '').replace('}'));
+        const filteredResponse = await chatSession.sendMessage(filterPrompt + '\n' + `<ol ol >\n` + result.response.text() + `\n</ol > `);
+        console.log(filteredResponse.response.text());
+        const res = filteredResponse.response.text();
+
+        let resFilter = res
+            .replace('[', '')
+            .replace(']', '')
+            .replace('{', '')
+            .replace('}', '')
+            .replace("undefined", '')
+            .replace(/^.*?["']?\s*/, '')
+            .replace(/^"html":\s*/i, '')
+            .replace(/\\n/g, '')    // literal \n
+            .replace(/\r?\n/g, '')  // actual newlines
+            .trim();
+
+        // Remove wrapping quotes around the whole string
+        if (resFilter.startsWith('"') && resFilter.endsWith('"')) {
+            resFilter = resFilter.slice(1, -1);
+        }
+
+        setvalue(resFilter);
+
+        onRichTextEditorChange(
+            { target: { value: resFilter } },  // fake “event”
+            'workSummery',                 // the field name your parent expects
+            index                          // the index prop you passed in
+        );
+
         setLoading(false);
     }
+
 
     return (
         <div>
