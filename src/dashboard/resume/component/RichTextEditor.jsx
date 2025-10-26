@@ -29,30 +29,53 @@ import { ThemeContext } from '@/context/ThemeContext';
 
 const PROMPT =
     `
-    Based on the position "{positionTitle}", provide 5-7 bullet points for my resume experience for a word file.
-    Do not include any JSON formatting, keys, or extra text or any special characters or quotes. 
+   Act as a professional resume writer. Write 5-7 bullet points in **plain, natural language** based on the title "{positionTitle}" for use in a resume. 
 
-    DO NOT GIVE RESPONSE LIKE A JSON OBJECT OR A JS OBJECT OR IN KEY VALUE PAIR JUST GIVE RESPONSE LIKE IN NARURAL LANGUAGE.
+⚠️ VERY IMPORTANT:
+- Do NOT use quotation marks, brackets, braces, or colons
+- Do NOT use keys like "bullets", "experience_level", or JSON-like structures
+- ONLY return each bullet point on its own line
+- Each bullet must begin with an action verb and contain measurable achievements where possible
 
-    Response format example(VERY STRICTLY FOLLOW!):
+✅ Example output:
+Developed and maintained applications using Python and Django.
+Led a team of 5 engineers to launch a new fintech product ahead of schedule.
+...
 
-    Developed and maintained applications using Python, Django, and PostgreSQL.
-    Collaborated with product managers and designers to define and implement user-friendly features. 
-    Implemented RESTful APIs to integrate with various internal and external services.
-    Automated testing using pytest and continuous integration/continuous deployment (CI/CD) pipelines.
-
-    UNACCETABLE RESPONSE EXAMPLE:
-    "bullets": [
-    "Developed and maintained applications using Java Spring Boot and RESTful APIs",
-    "Collaborated with cross-functional teams to design develop and deploy software solutions",
-    "Implemented automated testing frameworks using JUnit and Mockito to ensure high code quality",
-    "Troubleshooted and resolved production issues ensuring application stability and performance",
-    "Contributed to the design and implementation of CI/CD pipelines for automated deployments using Jenkins",
-    "Optimized application performance by identifying and resolving bottlenecks in code and database queries",
-    "Participated in code reviews and provided constructive feedback to improve code quality and maintainability"
+❌ Do NOT return this:
+{
+  "bullets": [
+    "Managed teams...",
+    ...
   ]
-
+}
     `
+
+const filterPrompt = `
+Convert the following response into clean, semantically valid HTML suitable for rendering in a rich text editor.
+
+    Use < ol > and < li > tags properly
+
+If items are numbered, use < ol > instead.
+
+Make sure every point is wrapped inside proper list tags — not just line breaks or paragraphs.
+
+Wrap all items inside < ol > and < li > tags.(HIGHEST PRIORITY)
+    + Prefer < ol > over < ul > when the points are sequential tasks or achievements.
+
+Avoid inline styles, just clean, valid HTML.
+
+Preserve all bold headings as <strong>
+
+Keep line breaks and paragraph structure clear
+
+Avoid external styles, inline CSS, or JavaScript
+
+Only return the HTML inside the < body > (no < html > or < head > tags)
+
+The result must be pasteable into a rich text editor that expects HTML
+`;
+
 function RichTextEditor({ onRichTextEditorChange, index, defaultValue }) {
     const { resumeInfo, setResumeInfo } = useContext(ResumeInfoContext);
     const [value, setvalue] = useState(defaultValue);
